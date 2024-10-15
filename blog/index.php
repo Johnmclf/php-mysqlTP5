@@ -1,3 +1,30 @@
+<?php
+   // Connexion à la base de données
+   try
+   {
+         $batabase = new PDO('mysql:host=localhost;dbname=blog;charset=utf8', 'root', 'root');
+   }
+   catch(Exception $e){
+         die( 'Erreur : '.$e->getMessage()   );
+   }
+
+   // On récupère les 5 derniers billets
+   $statement = $batabase->query(
+      "SELECT id, titre, contenu, DATE_FORMAT(date_creation, '%d/%m/%Y à %Hh%imin%ss') AS date_creation_fr FROM billets ORDER BY date_creation DESC LIMIT 0, 5");
+
+   $posts = [];
+   while ($row = $statement->fetch()) {
+      $post = [
+         'title' => $row['titre'],
+         'content' => $row['contenu'],
+         'frenchCreationDate' => $row['date_creation_fr'],
+      ];
+ 
+      $posts[] = $post;
+   }
+?>
+
+
 <!DOCTYPE html>
 <html>
    <head>
@@ -11,18 +38,6 @@
       <p>Derniers billets du blog :</p>
 
       <?php
-      // Connexion à la base de données
-      try
-      {
-          $bdd = new PDO('mysql:host=localhost;dbname=blog;charset=utf8', 'root', 'root');
-      }
-      catch(Exception $e){
-            die( 'Erreur : '.$e->getMessage()   );
-      }
-
-      // On récupère les 5 derniers billets
-      $req = $bdd->query('SELECT id, titre, contenu, DATE_FORMAT(date_creation, \'%d/%m/%Y à %Hh%imin%ss\') AS date_creation_fr FROM billets ORDER BY date_creation DESC LIMIT 0, 5');
-
       while ($donnees = $req->fetch())
       {
       ?>
@@ -46,3 +61,10 @@
       ?>
    </body>
 </html>
+
+<!-- 
+Les 3 erreurs importantes sont :
+- Utilisation de n'est pas conseillé die / exemple utiliser catch 
+- Aucun filtre de sécuriter lors de l'ajout / exemple utiliser filter_var()
+- Généralement la connection à la base de données et effectuer avant le HTML (éviter de mélanger le php et l'HTML)
+-->
